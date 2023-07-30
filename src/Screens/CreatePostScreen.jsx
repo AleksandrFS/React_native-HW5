@@ -7,24 +7,27 @@ import {
   TextInput,
   Image,
 } from "react-native";
-import { Camera, requestCameraPermissionsAsync } from "expo-camera";
+
+import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import LocImg from "../../assets/images/map-pin.png";
 import CameraIconImg from "../../assets/images/camera-icon.png";
 import { Pressable } from "react-native";
 
 export default CreatePostScreen = () => {
-  const [hasPermission, setHasPermission] = useState(null);
-  const [cameraRef, setCameraRef] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
 
-    useEffect(() => {
-      (async () => {
-        const { status } = await Camera.requestCameraPermissionsAsync();
-        await MediaLibrary.requestPermissionsAsync();
-        setHasPermission(status === "granted");
-      })();
-    }, []);
+  const [hasPermission, setHasPermission] = useState(null);
+  
+  const [typ, setType] = useState(Camera.Constants.Type.back);
+  const cameraRef = useRef(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      await MediaLibrary.requestPermissionsAsync();
+      setHasPermission(status === "granted");
+    })();
+  }, []);
 
   if (hasPermission === null) {
     return <View />;
@@ -36,7 +39,7 @@ export default CreatePostScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.PhotoWrap}>
-        <Camera type={type} ref={setCameraRef} style={styles.Camera} />
+        <Camera type={typ} ref={cameraRef} style={styles.Camera} />
 
         <Pressable
           style={styles.CameraBtn}
