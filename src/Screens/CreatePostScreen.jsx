@@ -16,7 +16,7 @@ import { Pressable } from "react-native";
 export default CreatePostScreen = () => {
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.front);
+  const [type, setType] = useState(Camera.Constants.Type.back);
 
     useEffect(() => {
       (async () => {
