@@ -241,4 +241,4 @@ const styles = StyleSheet.create({
     lineHeight: 18.75,
     color: "#1B4371",
   },
-});
+})
