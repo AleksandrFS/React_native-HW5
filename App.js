@@ -6,10 +6,12 @@ import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
+import Home from "./src/Screens/Home";
 import RegScreen from "./src/Screens/RegScreen";
 import LogScreen from "./src/Screens/LogScreen";
-import PostsScreen from "./src/Screens/PostsScreen";
-import Home from "./src/Screens/Home";
+import MapScreen from "./src/Screens/MapScreen";
+import CommentsScreen from "./src/Screens/CommentsScreen";
+
 
 import bgImg from "./assets/images/bg.jpg";
 
@@ -39,6 +41,47 @@ export default function App() {
             name="Home"
             component={Home}
             options={{ headerShown: false }}
+          />
+          <MainStack.Screen
+            name="CommentsScreen"
+            component={CommentsScreen}
+            options={{
+              title: "Коментарі",
+              headerTitleAlign: "center",
+              headerStyle: {
+                height: 100,
+                backgroundColor: "#fff",
+                shadowColor: "rgba(0, 0, 0, 0.5)",
+              },
+              headerTintColor: "#212121",
+              headerTitleStyle: {
+                fontWeight: 500,
+                fontSize: 17,
+                lineHeight: 22,
+                letterSpacing: 0.41,
+              },
+            }}
+            
+          />
+          <MainStack.Screen
+            name="MapScreen"
+            component={MapScreen}
+            options={{
+              title: "Мапа",
+              headerTitleAlign: "center",
+              headerStyle: {
+                height: 100,
+                backgroundColor: "#fff",
+                shadowColor: "rgba(0, 0, 0, 0.5)",
+              },
+              headerTintColor: "#212121",
+              headerTitleStyle: {
+                fontWeight: 500,
+                fontSize: 17,
+                lineHeight: 22,
+                letterSpacing: 0.41,
+              },
+            }}
           />
         </MainStack.Navigator>
       </NavigationContainer>

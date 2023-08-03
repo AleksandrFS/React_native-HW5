@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid/non-secure";
 import React, { useState, useEffect, useRef } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
@@ -6,26 +7,76 @@ import {
   StyleSheet,
   TextInput,
   Image,
+  Pressable,
+  Alert,
+  TouchableHighlight,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
-
+// import { useIsFocused } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { Camera } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
+import MapView, { Marker } from "react-native-maps";
+import * as Location from "expo-location";
 import LocImg from "../../assets/images/map-pin.png";
 import CameraIconImg from "../../assets/images/camera-icon.png";
-import { Pressable } from "react-native";
+import TrashIcon from "../../assets/images/trash.png";
+import { posts } from "../Data/postsData";
 
 export default CreatePostScreen = () => {
-
   const [hasPermission, setHasPermission] = useState(null);
-  
-  const [typ, setType] = useState(Camera.Constants.Type.back);
-  const cameraRef = useRef(null);
+  const [cameraRef, setCameraRef] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [uriPhoto, setUriPhoto] = useState(null);
+  const [photoName, setPhotoName] = useState();
+  const [terrain, setTerrain] = useState();
+  const [location, setLocations] = useState(null);
+
+  // const isFocused = useIsFocused();
+  // console.log(isFocused)
+
+  const navigation = useNavigation();
+
+  const clear = () => {
+    setUriPhoto(null);
+    setPhotoName(null);
+    setTerrain(null);
+    setLocations(null);
+  };
+
+  const handlePublish = () => {
+    const post = {
+      id: nanoid(),
+      title: photoName,
+      place: terrain,
+      coordinates: location,
+      img: uriPhoto,
+      comments: [],
+      likes: 0,
+    };
+
+    // console.log(img);
+    posts.push(post);
+    clear();
+    navigation.navigate("PostsScreen");
+  };
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
       await MediaLibrary.requestPermissionsAsync();
       setHasPermission(status === "granted");
+      // console.log(location)
     })();
   }, []);
 
@@ -37,75 +88,112 @@ export default CreatePostScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.PhotoWrap}>
-        <Camera type={typ} ref={cameraRef} style={styles.Camera} />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.PhotoWrap}>
+          {uriPhoto ? (
+            <Image source={{ uri: uriPhoto }} style={styles.Photo} />
+          ) : (
+            <Camera type={type} ref={setCameraRef} style={styles.Camera}>
+              <Pressable
+                style={styles.CameraBtn}
+                onPress={async () => {
+                  if (cameraRef) {
+                    const { uri } = await cameraRef.takePictureAsync();
+                    await MediaLibrary.createAssetAsync(uri);
+                    setUriPhoto(uri);
+                    console.log(uri)
+                    const locations = await Location.getCurrentPositionAsync(
+                      {}
+                    );
+                    const coords = {
+                      latitude: locations.coords.latitude,
+                      longitude: locations.coords.longitude,
+                    };
+                    setLocations(coords);
+                    // console.log(coords)
+                  }
+                }}
+              >
+                <Image source={CameraIconImg}></Image>
+              </Pressable>
+              <Pressable
+                style={styles.flipContainer}
+                onPress={() => {
+                  setType(
+                    type === Camera.Constants.Type.back
+                      ? Camera.Constants.Type.front
+                      : Camera.Constants.Type.back
+                  );
+                }}
+              >
+                <Ionicons
+                  name="camera-reverse-outline"
+                  size={28}
+                  color="white"
+                />
+              </Pressable>
+            </Camera>
+          )}
+        </View>
 
-        <Pressable
-          style={styles.CameraBtn}
-          onPress={async () => {
-            console.log("photo");
-            if (cameraRef) {
-              const { uri } = await cameraRef.takePictureAsync();
-              await MediaLibrary.createAssetAsync(uri);
-            }
-          }}
-        >
-          <Image source={CameraIconImg}></Image>
-        </Pressable>
-        <Pressable
-          style={styles.flipContainer}
-          onPress={() => {
-            console.log("flip");
-            setType(
-              type === Camera.Constants.Type.back
-                ? Camera.Constants.Type.front
-                : Camera.Constants.Type.back
-            );
-          }}
-        >
-          <Ionicons name="camera-reverse-outline" size={28} color="white" />
-        </Pressable>
+        {uriPhoto ? (
+          <Text style={styles.DownLoadText}>Редагувати фото</Text>
+        ) : (
+          <Text style={styles.DownLoadText}>Завантажте фото</Text>
+        )}
 
-        <Camera />
-      </View>
-
-      <Text style={styles.DownLoadText}>Завантажте фото</Text>
-      <View>
-        <View>
-          <View style={styles.InputAreaWrap}>
+        <View style={styles.InputAreaWrap}>
+          <TextInput
+            type="text"
+            placeholder="Назва..."
+            value={photoName}
+            onChangeText={setPhotoName}
+            placeholderTextColor={"#BDBDBD"}
+            selectionColor="#212121"
+            style={styles.Input}
+          ></TextInput>
+        </View>
+        <View style={styles.LocWrap}>
+          <Image source={LocImg} style={styles.LocImg} />
+          <View style={styles.InputAreaLocWrap}>
             <TextInput
               type="text"
-              placeholder="Назва..."
-              // value={email}
-              // onChangeText={onChangeEmail}
-              // keyboardType="email-address"
+              placeholder="Місцевість..."
+              // maxLength={37}
+              value={terrain}
+              onChangeText={setTerrain}
               placeholderTextColor={"#BDBDBD"}
               selectionColor="#212121"
-              // onFocus={() => onFocusMail()}
-              // style={[{ borderColor: focusColorMail }, styles.Input]}
+              style={styles.Input}
             ></TextInput>
           </View>
-          <View style={styles.LocWrap}>
-            <Image source={LocImg} style={styles.LocImg} />
-            <View style={styles.InputAreaLocWrap}>
-              <TextInput
-                type="text"
-                placeholder="Місцевість..."
-                // maxLength={37}
-                // value={password}
-                // onChangeText={onChangePass}
-                // secureTextEntry={showPass}
-                placeholderTextColor={"#BDBDBD"}
-                selectionColor="#212121"
-                // onFocus={() => onFocusPass()}
-                // style={[{ borderColor: focusColorPass }, styles.Input]}
-              ></TextInput>
-            </View>
-          </View>
         </View>
+        {uriPhoto && photoName && terrain ? (
+          <Pressable
+            style={[styles.PublishBtn, { backgroundColor: "#FF6C00" }]}
+            onPress={() => handlePublish()}
+          >
+            <Text style={[styles.BtnTitle, { color: "#fff" }]}>
+              Опублікувати
+            </Text>
+          </Pressable>
+        ) : (
+          <TouchableHighlight
+            style={[styles.PublishBtn, { backgroundColor: "#F6F6F6" }]}
+            onPress={() => Alert.alert("All inputs must be filled")}
+          >
+            <Text style={[styles.BtnTitle, { color: "#BDBDBD" }]}>
+              Опублікувати
+            </Text>
+          </TouchableHighlight>
+        )}
+
+        <Pressable style={styles.ClearBtn} onPress={clear}>
+          <Image source={TrashIcon} size={24} />
+        </Pressable>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -126,9 +214,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     borderRadius: 8,
     overflow: "hidden",
-    // flex: 1,
-    // backgroundColor: "transparent",
-    // justifyContent: "flex-end",
+  },
+  Photo: {
+    width: "100%",
+    height: "100%",
   },
   LocImg: {
     width: 24,
@@ -139,17 +228,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 4,
     alignItems: "center",
+    marginBottom: 52,
     borderBottomColor: "#E8E8E8",
     borderBottomWidth: 1,
   },
   InputAreaWrap: {
     height: 50,
+    marginBottom: 16,
     paddingTop: 16,
     paddingBottom: 15,
     borderBottomColor: "#E8E8E8",
     borderBottomWidth: 1,
   },
-  InputAreaLocWrap: { height: 50, paddingTop: 16, paddingBottom: 15 },
+  InputAreaLocWrap: {
+    width: "100%",
+    height: 50,
+    paddingTop: 16,
+    paddingBottom: 15,
+  },
   DownLoadText: {
     marginBottom: 32,
     fontFamily: "Roboto",
@@ -166,9 +262,44 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   flipContainer: {
-    position: "absolute",
-    // flex: 1,
-    // alignSelf: "flex-end",
-    // paddingRight: 10,
+    alignSelf: "flex-start",
+    paddingTop: 10,
+    paddingLeft: 10,
+  },
+  Input: {
+    width: "100%",
+    fontFamily: "Roboto",
+    fontSize: 16,
+    lineHeight: 18.75,
+    color: "#212121",
+  },
+  BtnTitle: {
+    fontFamily: "Roboto",
+    fontWeight: 400,
+    fontSize: 16,
+    lineHeight: 18.75,
+  },
+  PublishBtn: {
+    marginLeft: "auto",
+    marginRight: "auto",
+    marginBottom: 120,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 343,
+    height: 51,
+    borderRadius: 100,
+  },
+  ClearBtn: {
+    marginLeft: "auto",
+    marginRight: "auto",
+    width: 70,
+    height: 40,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+    backgroundColor: "#F6F6F6",
   },
 });
