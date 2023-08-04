@@ -12,7 +12,6 @@ import LogScreen from "./src/Screens/LogScreen";
 import MapScreen from "./src/Screens/MapScreen";
 import CommentsScreen from "./src/Screens/CommentsScreen";
 
-
 import bgImg from "./assets/images/bg.jpg";
 
 const MainStack = createStackNavigator();
@@ -61,7 +60,6 @@ export default function App() {
                 letterSpacing: 0.41,
               },
             }}
-            
           />
           <MainStack.Screen
             name="MapScreen"

@@ -1,11 +1,12 @@
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import LocImg from "../../assets/images/map-pin.png";
+import { AntDesign } from "@expo/vector-icons";
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 
 export default function Post({ post }) {
   const navigation = useNavigation();
-  const { id, title, place, coordinates, comments, img } = post;
+  const { id, title, place, coordinates, comments, img, likes } = post;
   // console.log(img);
   return (
     <View key={id} style={styles.MainWrap}>
@@ -21,19 +22,22 @@ export default function Post({ post }) {
             navigation.navigate("CommentsScreen", {
               comments,
               img,
-              id,
-              title,
             })
           }
         >
           <FontAwesome
             name="comments-o"
             size={24}
-            color="#BDBDBD"
+            color={!comments.length ? "#BDBDBD" : "#FF6C00"}
             style={{ marginRight: 6 }}
           />
-
-          <Text style={styles.comentsQuantity}>{comments.length}</Text>
+          <Text style={styles.LikesQuantity}>{comments.length}</Text>
+          {likes && (
+            <View style={styles.LikesWrap}>
+              <AntDesign name="like2" size={24} color="#FF6C00" />
+              <Text style={styles.Likes}>{likes}</Text>
+            </View>
+          )}
         </Pressable>
 
         <Pressable
@@ -102,5 +106,12 @@ const styles = StyleSheet.create({
   LocImg: {
     width: 24,
     height: 24,
+  },
+  LikesWrap: {
+    marginLeft: 24,
+    display: "flex",
+    flexDirection: "row",
+    gap: 6,
+    alignItems: "center",
   },
 });

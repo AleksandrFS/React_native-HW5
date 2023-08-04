@@ -1,8 +1,8 @@
 import UserLogo from "../../assets/images/UserLogo.jpg";
-import Ionicons from "@expo/vector-icons/Ionicons";
+// import Ionicons from "@expo/vector-icons/Ionicons";
 import { Text, View, StyleSheet, Image, FlatList } from "react-native";
 import Post from "../Components/Post";
-import {posts} from "../Data/postsData";
+import { posts } from "../Data/postsData";
 
 export default PostsScreen = () => {
   return (
@@ -29,7 +29,7 @@ export default PostsScreen = () => {
 const styles = StyleSheet.create({
   MainWrap: {
     paddingLeft: 16,
-    paddingRight:16,
+    paddingRight: 16,
     width: "100%",
     height: "100%",
     backgroundColor: "#FFF",
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
 
   UserWrap: {
     marginTop: 32,
-    marginBottom:32,
+    marginBottom: 32,
     display: "flex",
     flexDirection: "row",
     gap: 8,
